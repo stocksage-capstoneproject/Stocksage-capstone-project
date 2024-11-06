@@ -7,7 +7,6 @@ from sklearn.model_selection import cross_val_score, KFold
 import plotly.graph_objs as go
 import streamlit as st
 pip install --upgrade plotly streamlit
-
 from functools import lru_cache
 
 # Load the CSV file with an alternate encoding
