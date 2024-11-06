@@ -107,20 +107,22 @@ def calculate_profit_loss(predicted_prices, current_price):
 
     return profit_loss, advice
 
-def stock_price_prediction(ticker, lookahead_days, lookback_days):
+def stock_price_prediction(ticker, lookahead_days):
     """Predict stock prices based on historical data."""
     end_date = datetime.date.today().strftime('%Y-%m-%d')  # End date is today's date
-    start_date = (datetime.date.today() - datetime.timedelta(days=lookback_days)).strftime('%Y-%m-%d')  # Start date adjusted for lookback
-    historical_data = fetch_data_yahoo(ticker, start_date, end_date)  # Use dynamic range
+    historical_data = fetch_data_yahoo(ticker, '2000-01-01', end_date)
 
     if historical_data is None or historical_data.empty:
-        st.write(f"No data available for {ticker}.")
+        print(f"No data available for {ticker}.")
         return None, None
+
+    print(f"Fetched data for {ticker}: {historical_data.shape[0]} rows.")
 
     current_price = historical_data['Close'].iloc[-1]
 
-    if len(historical_data) < 200:  # Check for sufficient data
-        st.write(f"Insufficient data for {ticker}. Consider using a more liquid stock.")
+    # Adjust the data threshold using the shape attribute
+    if historical_data.shape[0] < 100:
+        print(f"Insufficient data for {ticker}. Consider using a more liquid stock.")
         return None, None
 
     features, target = preprocess_data(historical_data)
