@@ -174,7 +174,7 @@ def plot_results_interactive(results, historical_data):
     predicted_dates = results['Date'].tolist()
     predicted_prices = results['Predicted'].tolist()
 
-    fig.add_trace(go.Scatter(x=historical_dates, y=historical_data['Close'], mode='lines', name='Historical Data'))
+    fig.add_trace(go.Scatter(x=historical_dates, y=historical_data['Close'].tolist(), mode='lines', name='Historical Data'))
     fig.add_trace(go.Scatter(x=predicted_dates, y=predicted_prices, mode='lines', name='Predicted Data'))
 
     fig.update_layout(
@@ -222,6 +222,5 @@ def interactive_stock_prediction():
                 st.plotly_chart(fig)
             except Exception as e:
                 st.error(f"Error plotting the graph: {e}")
-
 # Run the interactive prediction tool in Streamlit
 interactive_stock_prediction()
