@@ -5,20 +5,24 @@ import yfinance as yf
 from sklearn.linear_model import LinearRegression
 from sklearn.model_selection import cross_val_score, KFold
 import plotly.graph_objs as go
-import plotly.express as px
-import streamlit as st
+import plotly.offline as pyo
+from ipywidgets import widgets
+from IPython.display import display, clear_output
 from functools import lru_cache
+
+# Ensure Plotly works in Jupyter notebooks
+pyo.init_notebook_mode(connected=True)
 
 # Load the CSV file with an alternate encoding
 try:
-    ticker_data = pd.read_csv('tickers.csv', encoding='ISO-8859-1')  # or encoding='latin1'
-    st.write("Loaded CSV file successfully.")
+    ticker_data = pd.read_csv('D:\\tickers.csv', encoding='ISO-8859-1')  # or encoding='latin1'
+    print("Loaded CSV file successfully.")
     
     # Drop rows where the 'Name' column (or the stock name column) has missing values
     ticker_data.dropna(subset=['Name'], inplace=True)
     
 except Exception as e:
-    st.write(f"Error loading tickers: {e}")
+    print(f"Error loading tickers: {e}")
     ticker_data = pd.DataFrame()
 
 @lru_cache(maxsize=32)
@@ -30,7 +34,7 @@ def fetch_data_yahoo(ticker, start_date, end_date):
             raise ValueError(f"No data found for the ticker symbol '{ticker}'.")
         return data
     except Exception as e:
-        st.write(f"Error fetching data for ticker '{ticker}': {e}")
+        print(f"Error fetching data for ticker '{ticker}': {e}")
         return None
         
 def preprocess_data(data):
@@ -54,7 +58,7 @@ def train_model(X, y):
     kf = KFold(n_splits=5, shuffle=True, random_state=42)
     scores = cross_val_score(model, X, y, cv=kf, scoring='neg_mean_squared_error')
     mean_score = -scores.mean()  # Convert back to positive MSE
-    st.write(f"Mean Cross-Validation MSE: {mean_score:.4f}")
+    print(f"Mean Cross-Validation MSE: {mean_score:.4f}")
 
     # Fit the model on the entire dataset after evaluation
     model.fit(X, y)
@@ -184,29 +188,72 @@ def plot_results(results, historical_data, ticker):
         template='plotly_white'
     )
 
-    # Show Plotly figure in Streamlit
-    st.plotly_chart(fig)
+    # Use Plotly's offline mode to display the figure inline
+    pyo.iplot(fig)
 
-# Streamlit widgets for interactive stock prediction
 def interactive_stock_prediction():
-    """Interactive widget with stock ticker search functionality."""
-    tickers = ticker_data['Ticker'].tolist() if 'Ticker' in ticker_data.columns else []
+    """Interactive widget with search functionality."""
+    stock_names = ticker_data['Name'].tolist() if 'Name' in ticker_data.columns else []
 
-    ticker = st.selectbox("Choose a stock ticker:", tickers)  # Replace combobox with selectbox
+    stock_ticker_widget = widgets.Text(
+        placeholder='Enter stock ticker...',
+        description='Ticker:',
+        disabled=False
+    )
 
-    lookahead_days = st.slider("Lookahead Days:", min_value=1, max_value=100, value=10)
-    lookback_days = st.slider("Lookback Days:", min_value=1, max_value=365, value=200)
+    lookback_days_slider = widgets.IntSlider(
+        value=365,
+        min=1,
+        max=365,
+        step=1,
+        description='Lookback:',
+        continuous_update=False
+    )
 
-    run_button = st.button("Run Prediction")
+    lookahead_days_slider = widgets.IntSlider(
+        value=10,
+        min=1,
+        max=100,
+        step=1,
+        description='Lookahead:',
+        continuous_update=False
+    )
 
-    if run_button:
-        results, advice = stock_price_prediction(ticker, lookahead_days)
-        if results is not None:
-            st.write("### Predicted Stock Prices:")
-            st.write(results)
-            st.write("### Investment Advice:")
-            st.write(advice)
-            plot_results(results, fetch_data_yahoo(ticker, '2000-01-01', datetime.date.today().strftime('%Y-%m-%d')), ticker)
+    run_button = widgets.Button(
+        description='Run Prediction',
+        button_style='success'
+    )
 
-# Run the Streamlit app
+    output = widgets.Output()
+
+    def on_run_button_clicked(b):
+        with output:
+            clear_output(wait=True)
+            stock_ticker = stock_ticker_widget.value.strip().upper()
+            lookahead = lookahead_days_slider.value
+
+            # Find the corresponding ticker based on the stock ticker
+            ticker_row = ticker_data[ticker_data['Ticker'].str.upper() == stock_ticker]
+
+            if ticker_row.empty:
+                print(f"No stock found for '{stock_ticker}'.")
+                return
+
+            ticker_symbol = ticker_row.iloc[0]['Ticker']
+
+            # Call the function with only two arguments: ticker_symbol and lookahead
+            results, advice = stock_price_prediction(ticker_symbol, lookahead)
+            if results is not None:
+                print("### Predicted Stock Prices:")
+                print(results)
+                print("### Investment Advice:")
+                print(advice)
+                plot_results(results, fetch_data_yahoo(ticker_symbol, '2000-01-01', datetime.date.today().strftime('%Y-%m-%d')), ticker_symbol)
+
+    run_button.on_click(on_run_button_clicked)
+
+    # Display the interactive elements
+    display(stock_ticker_widget, lookback_days_slider, lookahead_days_slider, run_button, output)
+
+# Run the interactive prediction tool
 interactive_stock_prediction()
