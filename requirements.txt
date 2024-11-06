@@ -4,5 +4,5 @@ yfinance
 scikit-learn
 plotly
 ipywidgets
-IPython.display
+IPython
 functools
