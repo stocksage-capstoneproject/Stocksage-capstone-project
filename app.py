@@ -4,7 +4,7 @@ from pandas.tseries.offsets import BDay
 import yfinance as yf
 from sklearn.linear_model import LinearRegression
 from sklearn.model_selection import cross_val_score, KFold
-import plotly.graph_objs as go
+import matplotlib.pyplot as plt
 import streamlit as st
 from functools import lru_cache
 
@@ -152,41 +152,24 @@ def stock_price_prediction(ticker, lookahead_days):
 
     return result, advice
 
-def plot_results_interactive(results, historical_data):
-    """Plot the predicted and historical stock prices using Plotly interactive graph."""
-    historical_min = historical_data['Close'].min()
-    historical_max = historical_data['Close'].max()
+def plot_results_matplotlib(results, historical_data):
+    """Plot the predicted and historical stock prices using Matplotlib."""
+    plt.figure(figsize=(10, 6))
 
-    predicted_min = results['Predicted'].min()
-    predicted_max = results['Predicted'].max()
+    # Plot historical data
+    plt.plot(historical_data.index, historical_data['Close'], label='Historical Data', color='blue')
 
-    min_price = min(historical_min, predicted_min)
-    max_price = max(historical_max, predicted_max)
-    price_range_padding = (max_price - min_price) * 0.05  # 5% padding for better visualization
+    # Plot predicted data
+    plt.plot(results['Date'], results['Predicted'], label='Predicted Data', color='red', linestyle='--')
 
-    min_price -= price_range_padding
-    max_price += price_range_padding
+    # Add labels and title
+    plt.title('Historical and Predicted Stock Prices')
+    plt.xlabel('Date')
+    plt.ylabel('Price')
+    plt.legend()
 
-    fig = go.Figure()
-
-    # Ensure the Date and Predicted are in list form for Plotly
-    historical_dates = historical_data.index.tolist()
-    predicted_dates = results['Date'].tolist()
-    predicted_prices = results['Predicted'].tolist()
-
-    fig.add_trace(go.Scatter(x=historical_dates, y=historical_data['Close'].tolist(), mode='lines', name='Historical Data'))
-    fig.add_trace(go.Scatter(x=predicted_dates, y=predicted_prices, mode='lines', name='Predicted Data'))
-
-    fig.update_layout(
-        title='Historical and Predicted Stock Prices',
-        xaxis_title='Date',
-        yaxis_title='Price',
-        yaxis=dict(range=[min_price, max_price]),
-        template='plotly_dark',
-        hovermode='closest'
-    )
-
-    return fig
+    # Display the plot
+    st.pyplot(plt)
 
 def interactive_stock_prediction():
     """Interactive widget with search functionality."""
@@ -218,9 +201,9 @@ def interactive_stock_prediction():
             st.write(advice)
 
             try:
-                fig = plot_results_interactive(results, fetch_data_yahoo(ticker_symbol, '2000-01-01', datetime.date.today().strftime('%Y-%m-%d')))
-                st.plotly_chart(fig)
+                plot_results_matplotlib(results, fetch_data_yahoo(ticker_symbol, '2000-01-01', datetime.date.today().strftime('%Y-%m-%d')))
             except Exception as e:
                 st.error(f"Error plotting the graph: {e}")
+
 # Run the interactive prediction tool in Streamlit
 interactive_stock_prediction()
