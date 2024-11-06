@@ -143,9 +143,10 @@ def stock_price_prediction(ticker, lookahead_days):
 
     profit_loss, advice = calculate_profit_loss(predictions, current_price)
 
+    # Create the results DataFrame with a column for predicted prices
     result = pd.DataFrame({
         'Date': future_dates,
-        'Predicted Price': predictions,
+        'Predicted': predictions,  # Ensure the predictions are in the 'Predicted' column
         'Profit/Loss': profit_loss
     })
 
