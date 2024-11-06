@@ -151,46 +151,49 @@ def stock_price_prediction(ticker, lookahead_days):
 
     return result, advice
 
-def plot_results(results, historical_data, ticker):
-    """Visualize historical and predicted stock prices using Plotly."""
+import plotly.graph_objects as go
+import pandas as pd
+import streamlit as st
+
+def plot_results(results, historical_data):
+    """Plot the predicted and historical stock prices using Plotly."""
+    
+    # Ensure results and historical_data are Series or DataFrame
+    historical_min = historical_data['Close'].min() if isinstance(historical_data['Close'], pd.Series) else historical_data['Close']
+    historical_max = historical_data['Close'].max() if isinstance(historical_data['Close'], pd.Series) else historical_data['Close']
+    
+    predicted_min = results['Predicted'].min() if isinstance(results['Predicted'], pd.Series) else results['Predicted']
+    predicted_max = results['Predicted'].max() if isinstance(results['Predicted'], pd.Series) else results['Predicted']
+
+    # Calculate the global min and max price, with padding for visualization
+    min_price = min(historical_min, predicted_min)
+    max_price = max(historical_max, predicted_max)
+    price_range_padding = (max_price - min_price) * 0.05  # 5% padding for better visualization
+
+    # Adjust min/max with padding
+    min_price -= price_range_padding
+    max_price += price_range_padding
+
+    # Plot using Plotly
     fig = go.Figure()
 
-    # Plot historical prices
-    fig.add_trace(go.Scatter(
-        x=historical_data.index,
-        y=historical_data['Close'],
-        mode='lines',
-        name='Historical Price',
-        line=dict(color='royalblue')
-    ))
+    # Add Historical Data (Close price)
+    fig.add_trace(go.Scatter(x=historical_data.index, y=historical_data['Close'], mode='lines', name='Historical Data'))
 
-    # Plot predicted prices
-    fig.add_trace(go.Scatter(
-        x=results['Date'],
-        y=results['Predicted Price'],
-        mode='lines+markers',
-        name='Predicted Price',
-        line=dict(color='orange', dash='dash')
-    ))
+    # Add Predicted Data (Predicted price)
+    fig.add_trace(go.Scatter(x=results.index, y=results['Predicted'], mode='lines', name='Predicted Data'))
 
-    # Automatically adjust y-axis to zoom in on the range of prices
-    min_price = min(historical_data['Close'].min(), results['Predicted Price'].min())
-    max_price = max(historical_data['Close'].max(), results['Predicted Price'].max())
-    price_range_padding = (max_price - min_price) * 0.05  # 5% padding on y-axis
-
-    # Update layout for interactivity and auto-adjust y-axis
+    # Update layout
     fig.update_layout(
-        title=f'Stock Price Prediction for {ticker}',
+        title='Historical and Predicted Stock Prices',
         xaxis_title='Date',
         yaxis_title='Price',
-        legend=dict(x=0, y=1),
-        hovermode='x unified',
-        dragmode='zoom',
-        xaxis=dict(rangeslider=dict(visible=True)),
-        yaxis=dict(range=[min_price - price_range_padding, max_price + price_range_padding]),
-        template='plotly_white'
+        yaxis=dict(range=[min_price, max_price]),  # Set dynamic y-axis range
+        template='plotly_dark',  # Use a dark theme (optional)
+        hovermode='closest'
     )
 
+    # Show Plotly figure in Streamlit
     st.plotly_chart(fig)
 
 def interactive_stock_prediction():
