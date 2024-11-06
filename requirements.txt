@@ -2,6 +2,6 @@ pandas
 datetime
 yfinance
 scikit-learn
-matplotlib.pyplot
+matplotlib
 ipywidgets
 IPython
