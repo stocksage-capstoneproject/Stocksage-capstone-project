@@ -1,0 +1,11 @@
+pandas
+datetime
+pandas.tseries.offsets
+yfinance
+sklearn.linear_model
+sklearn.model_selection
+plotly.graph_objs
+plotly.offline
+ipywidgets
+IPython.display
+functools
