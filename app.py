@@ -158,7 +158,8 @@ import streamlit as st
 def plot_results(results, historical_data):
     """Plot the predicted and historical stock prices using Plotly."""
     
-    # Ensure results and historical_data are Series or DataFrame
+    # Ensure results and historical_data are DataFrames
+    # Extract the scalar min/max values from both historical_data and results
     historical_min = historical_data['Close'].min() if isinstance(historical_data['Close'], pd.Series) else historical_data['Close']
     historical_max = historical_data['Close'].max() if isinstance(historical_data['Close'], pd.Series) else historical_data['Close']
     
