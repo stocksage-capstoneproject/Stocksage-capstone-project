@@ -11,7 +11,7 @@ from functools import lru_cache
 
 # Load the CSV file with an alternate encoding
 try:
-    ticker_data = pd.read_csv('D:\\tickers.csv', encoding='ISO-8859-1')  # or encoding='latin1'
+    ticker_data = pd.read_csv('tickers.csv', encoding='ISO-8859-1')  # or encoding='latin1'
     st.write("Loaded CSV file successfully.")
     
     # Drop rows where the 'Name' column (or the stock name column) has missing values
