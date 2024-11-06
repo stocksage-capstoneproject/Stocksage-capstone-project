@@ -1,7 +1,7 @@
 pandas
 datetime
 yfinance
-sklearn
+scikit-learn
 plotly
 ipywidgets
 IPython.display
