@@ -1,8 +1,10 @@
 import pandas as pd
 import datetime
+from pandas.tseries.offsets import BDay
 import yfinance as yf
 from sklearn.linear_model import LinearRegression
 from sklearn.model_selection import cross_val_score, KFold
+import plotly.graph_objs as go
 import streamlit as st
 from functools import lru_cache
 
@@ -137,7 +139,7 @@ def stock_price_prediction(ticker, lookahead_days):
 
     predictions = predict_future(model, last_known_features, lookahead_days)
 
-    future_dates = pd.bdate_range(historical_data.index[-1] + pd.Timedelta(days=1), periods=lookahead_days)
+    future_dates = pd.bdate_range(historical_data.index[-1] + BDay(1), periods=lookahead_days)
 
     profit_loss, advice = calculate_profit_loss(predictions, current_price)
 
@@ -149,6 +151,37 @@ def stock_price_prediction(ticker, lookahead_days):
     })
 
     return result, advice
+
+def plot_results_interactive(results, historical_data):
+    """Plot the predicted and historical stock prices using Plotly interactive graph."""
+    historical_min = historical_data['Close'].min()
+    historical_max = historical_data['Close'].max()
+
+    predicted_min = results['Predicted'].min()
+    predicted_max = results['Predicted'].max()
+
+    min_price = min(historical_min, predicted_min)
+    max_price = max(historical_max, predicted_max)
+    price_range_padding = (max_price - min_price) * 0.05  # 5% padding for better visualization
+
+    min_price -= price_range_padding
+    max_price += price_range_padding
+
+    fig = go.Figure()
+
+    fig.add_trace(go.Scatter(x=historical_data.index, y=historical_data['Close'], mode='lines', name='Historical Data'))
+    fig.add_trace(go.Scatter(x=results['Date'], y=results['Predicted'], mode='lines', name='Predicted Data'))
+
+    fig.update_layout(
+        title='Historical and Predicted Stock Prices',
+        xaxis_title='Date',
+        yaxis_title='Price',
+        yaxis=dict(range=[min_price, max_price]),
+        template='plotly_dark',
+        hovermode='closest'
+    )
+
+    return fig
 
 def interactive_stock_prediction():
     """Interactive widget with search functionality."""
@@ -178,6 +211,8 @@ def interactive_stock_prediction():
             st.write(results)
             st.write("### Investment Advice:")
             st.write(advice)
+            fig = plot_results_interactive(results, fetch_data_yahoo(ticker_symbol, '2000-01-01', datetime.date.today().strftime('%Y-%m-%d')))
+            st.plotly_chart(fig)
 
 # Run the interactive prediction tool in Streamlit
 interactive_stock_prediction()
