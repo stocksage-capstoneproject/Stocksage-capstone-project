@@ -200,7 +200,7 @@ def interactive_stock_prediction():
     run_button = st.button("Run Prediction")
 
     if run_button:
-        results, advice = stock_price_prediction(ticker, lookahead_days, lookback_days)
+        results, advice = stock_price_prediction(ticker, lookahead_days)
         if results is not None:
             st.write("### Predicted Stock Prices:")
             st.write(results)
