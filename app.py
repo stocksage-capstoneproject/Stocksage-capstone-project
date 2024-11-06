@@ -169,8 +169,13 @@ def plot_results_interactive(results, historical_data):
 
     fig = go.Figure()
 
-    fig.add_trace(go.Scatter(x=historical_data.index, y=historical_data['Close'], mode='lines', name='Historical Data'))
-    fig.add_trace(go.Scatter(x=results['Date'], y=results['Predicted'], mode='lines', name='Predicted Data'))
+    # Ensure the Date and Predicted are in list form for Plotly
+    historical_dates = historical_data.index.tolist()
+    predicted_dates = results['Date'].tolist()
+    predicted_prices = results['Predicted'].tolist()
+
+    fig.add_trace(go.Scatter(x=historical_dates, y=historical_data['Close'], mode='lines', name='Historical Data'))
+    fig.add_trace(go.Scatter(x=predicted_dates, y=predicted_prices, mode='lines', name='Predicted Data'))
 
     fig.update_layout(
         title='Historical and Predicted Stock Prices',
