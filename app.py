@@ -6,7 +6,6 @@ from sklearn.linear_model import LinearRegression
 from sklearn.model_selection import cross_val_score, KFold
 import plotly.graph_objs as go
 import streamlit as st
-pip install --upgrade plotly streamlit
 from functools import lru_cache
 
 # Load the CSV file with an alternate encoding
@@ -212,8 +211,12 @@ def interactive_stock_prediction():
             st.write(results)
             st.write("### Investment Advice:")
             st.write(advice)
-            fig = plot_results_interactive(results, fetch_data_yahoo(ticker_symbol, '2000-01-01', datetime.date.today().strftime('%Y-%m-%d')))
-            st.plotly_chart(fig)
+
+            try:
+                fig = plot_results_interactive(results, fetch_data_yahoo(ticker_symbol, '2000-01-01', datetime.date.today().strftime('%Y-%m-%d')))
+                st.plotly_chart(fig)
+            except Exception as e:
+                st.error(f"Error plotting the graph: {e}")
 
 # Run the interactive prediction tool in Streamlit
 interactive_stock_prediction()
