@@ -82,6 +82,10 @@ def calculate_profit_loss(predicted_prices, current_price):
     if isinstance(predicted_prices, pd.Series):
         predicted_prices = predicted_prices.tolist()
 
+    # Make sure current_price is a scalar value (not a series)
+    if isinstance(current_price, pd.Series):
+        current_price = current_price.iloc[0]
+
     # Determine trend based on the first and last predicted prices
     if predicted_prices[0] < predicted_prices[-1]:
         trend = "Uptrend"
