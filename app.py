@@ -153,23 +153,27 @@ def stock_price_prediction(ticker, lookahead_days):
     return result, advice
 
 def plot_results_matplotlib(results, historical_data):
-    """Plot the predicted and historical stock prices using Matplotlib."""
-    plt.figure(figsize=(10, 6))
+    """Plot the predicted and historical stock prices using Matplotlib with zooming capabilities."""
+    fig, ax = plt.subplots(figsize=(10, 6))
 
     # Plot historical data
-    plt.plot(historical_data.index, historical_data['Close'], label='Historical Data', color='blue')
+    ax.plot(historical_data.index, historical_data['Close'], label='Historical Data', color='blue')
 
     # Plot predicted data
-    plt.plot(results['Date'], results['Predicted'], label='Predicted Data', color='red', linestyle='--')
+    ax.plot(results['Date'], results['Predicted'], label='Predicted Data', color='red', linestyle='--')
 
     # Add labels and title
-    plt.title('Historical and Predicted Stock Prices')
-    plt.xlabel('Date')
-    plt.ylabel('Price')
-    plt.legend()
+    ax.set_title('Historical and Predicted Stock Prices')
+    ax.set_xlabel('Date')
+    ax.set_ylabel('Price')
+    ax.legend()
 
-    # Display the plot
-    st.pyplot(plt)
+    # Enabling zoom and pan by default
+    ax.set_autoscale_on(True)
+    fig.canvas.draw()
+
+    # Display the plot in Streamlit
+    st.pyplot(fig)
 
 def interactive_stock_prediction():
     """Interactive widget with search functionality."""
