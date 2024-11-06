@@ -211,7 +211,6 @@ def interactive_stock_prediction():
             st.write(results)
             st.write("### Investment Advice:")
             st.write(advice)
-            plot_results(results, fetch_data_yahoo(ticker_symbol, '2000-01-01', datetime.date.today().strftime('%Y-%m-%d')), ticker_symbol)
-
+            plot_results(results, fetch_data_yahoo(ticker_symbol, '2000-01-01', datetime.date.today().strftime('%Y-%m-%d')))
 # Run the interactive prediction tool in Streamlit
 interactive_stock_prediction()
