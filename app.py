@@ -78,6 +78,10 @@ def calculate_profit_loss(predicted_prices, current_price):
     profit_loss = []
     trend = "Stable"
 
+    # Ensure predicted_prices is a list of values for comparison
+    if isinstance(predicted_prices, pd.Series):
+        predicted_prices = predicted_prices.tolist()
+
     # Determine trend based on the first and last predicted prices
     if predicted_prices[0] < predicted_prices[-1]:
         trend = "Uptrend"
