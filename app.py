@@ -150,17 +150,18 @@ def stock_price_prediction(ticker, lookahead_days):
         'Profit/Loss': profit_loss
     })
 
-    return result, advice
+    return result, advice, historical_data
 
-def plot_results_matplotlib(results, historical_data):
+def plot_results_matplotlib(results, historical_data, lookahead_days):
     """Plot the predicted and historical stock prices using Matplotlib with zooming capabilities."""
+    # Create a figure and axis
     fig, ax = plt.subplots(figsize=(10, 6))
 
-    # Plot historical data
-    ax.plot(historical_data.index, historical_data['Close'], label='Historical Data', color='blue')
+    # Plot historical data (lookback period)
+    ax.plot(historical_data.index[-lookahead_days-365:], historical_data['Close'][-lookahead_days-365:], label='Historical Data (Lookback)', color='blue')
 
-    # Plot predicted data
-    ax.plot(results['Date'], results['Predicted'], label='Predicted Data', color='red', linestyle='--')
+    # Plot predicted data (lookahead period)
+    ax.plot(results['Date'], results['Predicted'], label='Predicted Data (Lookahead)', color='red', linestyle='--')
 
     # Add labels and title
     ax.set_title('Historical and Predicted Stock Prices')
@@ -197,7 +198,7 @@ def interactive_stock_prediction():
 
         ticker_symbol = ticker_row.iloc[0]['Ticker']
 
-        results, advice = stock_price_prediction(ticker_symbol, lookahead_days)
+        results, advice, historical_data = stock_price_prediction(ticker_symbol, lookahead_days)
         if results is not None:
             st.write("### Predicted Stock Prices:")
             st.write(results)
@@ -205,7 +206,7 @@ def interactive_stock_prediction():
             st.write(advice)
 
             try:
-                plot_results_matplotlib(results, fetch_data_yahoo(ticker_symbol, '2000-01-01', datetime.date.today().strftime('%Y-%m-%d')))
+                plot_results_matplotlib(results, historical_data, lookahead_days)
             except Exception as e:
                 st.error(f"Error plotting the graph: {e}")
 
